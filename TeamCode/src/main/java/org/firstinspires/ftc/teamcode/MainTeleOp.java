@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+ 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -49,11 +49,11 @@ public class MainTeleOp extends LinearOpMode {
     private Servo left, right, jewel;
     private int ticks = 0;
 
-    private static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    private static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
-    private static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    private static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+    private static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // 1120 CPR for Andymark Motors
+    private static final double     LIFT_GEAR_REDUCTION    = 0.5 ;     // Gearing Up by 2
+    private static final double     GEAR_DIAMETER_INCHES   = 2.58 ;     // For figuring circumference
+    private static final double     LIFT_COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * LIFT_GEAR_REDUCTION) /
+            (GEAR_DIAMETER_INCHES * 3.1415);
     private static double cPos = 0.0;
 
 
@@ -71,9 +71,12 @@ public class MainTeleOp extends LinearOpMode {
         motorLeftBack.setDirection(DcMotor.Direction.FORWARD);
         motorLift = hardwareMap.get(DcMotor.class, "ml");
         motorLift.setDirection(DcMotor.Direction.REVERSE);
+        motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         jewel = hardwareMap.get(Servo.class, "jewels");
         left = hardwareMap.get(Servo.class, "lefts");
         right = hardwareMap.get(Servo.class, "rights");
+        
 
         //Wait for the play button to be hit
         waitForStart();
@@ -87,9 +90,9 @@ public class MainTeleOp extends LinearOpMode {
             if (gamepad1.a) {
                 balancing = !balancing;
             }
-            if (gamepad1.x) {
+            if (gamepad1.x /* && motorLift.getCurrentPosition()>-150)*/) {
                 motorLift.setPower(1);
-            } else if (gamepad1.y) {
+            } else if (gamepad1.y /* && motorLift.getCurrentPosition()<150)*/) {
                 motorLift.setPower(-1);
             } else {
                 motorLift.setPower(0);
@@ -99,14 +102,16 @@ public class MainTeleOp extends LinearOpMode {
                 right.setPosition(0.5);
             }
             if (gamepad1.right_bumper) {
-                left.setPosition(1);
-                right.setPosition(0);
+                left.setPosition(0.8);
+                right.setPosition(0.2);
             }
             //Check if we are in the balancing process
             if (balancing) {
 
                 //Begin balancing - Remember we are working off of the last checks information
                 telemetry.addData("Mode", "Gentle Balancing");
+                telemetry.addData("Lift Position",  "%7d",
+                          motorLift.getCurrentPosition());
 
                 //Read controller input
                 float gamepad1LeftY = -gamepad1.left_stick_y;
@@ -137,7 +142,9 @@ public class MainTeleOp extends LinearOpMode {
 
                 //Regular TeleOp Telemetry
                 telemetry.addData("Mode", "Controllers Active");
-                telemetry.update();
+                telemetry.addData("Lift Position",  "%7d",
+                          motorLift.getCurrentPosition());
+
 
                 //Read controller input
                 float gamepad1LeftY = -gamepad1.left_stick_y;
