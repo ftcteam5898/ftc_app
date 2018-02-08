@@ -1,27 +1,14 @@
- 
+package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-
-import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by William.Beard on 9/27/2017.
@@ -41,25 +28,29 @@ import java.util.Locale;
  * be easily adapted.
  */
 
-@TeleOp(name="TeleOp", group="TeleOp")
+@TeleOp(name="MainTeleOp", group="TeleOp")
 public class MainTeleOp extends LinearOpMode {
 
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront, motorLift;
-    private boolean balancing = false, grasping = false;
-    private Servo left, right, jewel;
-    private int ticks = 0;
+    private Servo left, right, left1, right1, jewel;
+    private boolean manual = false;
+    private ModernRoboticsI2cGyro gyro = null;
 
-    private static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // 1120 CPR for Andymark Motors
-    private static final double     LIFT_GEAR_REDUCTION    = 0.5 ;     // Gearing Up by 2
-    private static final double     GEAR_DIAMETER_INCHES   = 2.58 ;     // For figuring circumference
-    private static final double     LIFT_COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * LIFT_GEAR_REDUCTION) /
-            (GEAR_DIAMETER_INCHES * 3.1415);
-    private static double cPos = 0.0;
-
+    private class Move extends TimerTask {
+        MainTeleOp MTO = null;
+        public Move(MainTeleOp mto) {
+            MTO = mto;
+        }
+        public void run() {
+            MTO.setLiftPosition(-200);
+        }
+    }
 
     @Override
     public void runOpMode() {
 
+        jewel = hardwareMap.get(Servo.class, "jewels");
+        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
         motorRightBack = hardwareMap.get(DcMotor.class, "mrb");
         motorRightBack.setDirection(DcMotor.Direction.FORWARD);
         motorLeftFront = hardwareMap.get(DcMotor.class, "mlf");
@@ -72,105 +63,102 @@ public class MainTeleOp extends LinearOpMode {
         motorLift = hardwareMap.get(DcMotor.class, "ml");
         motorLift.setDirection(DcMotor.Direction.REVERSE);
         motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        jewel = hardwareMap.get(Servo.class, "jewels");
+        motorLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         left = hardwareMap.get(Servo.class, "lefts");
         right = hardwareMap.get(Servo.class, "rights");
-        
+        left1 = hardwareMap.get(Servo.class, "lefts1");
+        right1 = hardwareMap.get(Servo.class, "rights1");
 
         //Wait for the play button to be hit
         waitForStart();
 
+        gyro.calibrate();
+
+        // make sure the gyro is calibrated before continuing
+        while (!isStopRequested() && gyro.isCalibrating())  {
+            sleep(50);
+            idle();
+        }
+
+        jewel.setPosition(0);
+
+        setLiftPosition(1000);
+
+        Timer time = new Timer();
+
         left.setPosition(0.5);
         right.setPosition(0.5);
+        left1.setPosition(0.5);
+        right1.setPosition(0.5);
+
         //BEGIN
         while (opModeIsActive()) {
-            //Reassign balancing variable
-            jewel.setPosition(0);
             if (gamepad1.a) {
-                balancing = !balancing;
-            }
-            if (gamepad1.x /* && motorLift.getCurrentPosition()>-150)*/) {
+                motorLift.setTargetPosition(motorLift.getCurrentPosition() + 50);
                 motorLift.setPower(1);
-            } else if (gamepad1.y /* && motorLift.getCurrentPosition()<150)*/) {
-                motorLift.setPower(-1);
-            } else {
+            }
+            if (gamepad1.y) {
                 motorLift.setPower(0);
+                motorLift.setDirection(DcMotor.Direction.REVERSE);
+                motorLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                motorLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+            if (gamepad1.b) {
+                motorLift.setPower(0);
+            }
+            if (gamepad1.x) {
+                left.setPosition(0.7);
+                right.setPosition(0.3);
+                left1.setPosition(0.7);
+                right1.setPosition(0.3);
+            }
+            if (gamepad1.dpad_up) {
+                setLiftPosition(-4700);
+            } else if (gamepad1.dpad_down) {
+                setLiftPosition(0);
             }
             if (gamepad1.left_bumper) {
                 left.setPosition(0.5);
                 right.setPosition(0.5);
+                left1.setPosition(0.5);
+                right1.setPosition(0.5);
+            } else if (gamepad1.right_bumper) {
+                left.setPosition(1);
+                right.setPosition(0);
+                left1.setPosition(1);
+                right1.setPosition(0);
+                time.schedule(new Move(this), 200);
+
             }
-            if (gamepad1.right_bumper) {
-                left.setPosition(0.8);
-                right.setPosition(0.2);
-            }
-            //Check if we are in the balancing process
-            if (balancing) {
-
-                //Begin balancing - Remember we are working off of the last checks information
-                telemetry.addData("Mode", "Gentle Balancing");
-                telemetry.addData("Lift Position",  "%7d",
-                          motorLift.getCurrentPosition());
-
-                //Read controller input
-                float gamepad1LeftY = -gamepad1.left_stick_y;
-                float gamepad1LeftX = gamepad1.left_stick_x;
-                float gamepad1RightX = -gamepad1.left_trigger + gamepad1.right_trigger;
-
-                //Formulas for holonomic power
-                float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-                float FrontRight = gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-                float BackRight = gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-                float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-
-                //Make sure each is in the proper range and if not, make it
-                FrontRight = Range.clip(FrontRight, -1, 1);
-                FrontLeft = Range.clip(FrontLeft, -1, 1);
-                BackLeft = Range.clip(BackLeft, -1, 1);
-                BackRight = Range.clip(BackRight, -1, 1);
-
-                //Set the power to each motor
-                motorRightFront.setPower(0.5*FrontRight);
-                motorLeftFront.setPower(0.5*FrontLeft);
-                motorLeftBack.setPower(0.5*BackLeft);
-                motorRightBack.setPower(0.5*BackRight);
-                telemetry.update();
-
-            //Do normal control scenario
-            } else {
-
-                //Regular TeleOp Telemetry
-                telemetry.addData("Mode", "Controllers Active");
-                telemetry.addData("Lift Position",  "%7d",
-                          motorLift.getCurrentPosition());
-
-
-                //Read controller input
-                float gamepad1LeftY = -gamepad1.left_stick_y;
-                float gamepad1LeftX = gamepad1.left_stick_x;
-                float gamepad1RightX = -gamepad1.left_trigger + gamepad1.right_trigger;
-
-                //Formulas for holonomic power
-                float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-                float FrontRight = gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
-                float BackRight = gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-                float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
-
-                //Make sure each is in the proper range and if not, make it
-                FrontRight = Range.clip(FrontRight, -1, 1);
-                FrontLeft = Range.clip(FrontLeft, -1, 1);
-                BackLeft = Range.clip(BackLeft, -1, 1);
-                BackRight = Range.clip(BackRight, -1, 1);
-
-                //Set the power to each motor
-                motorRightFront.setPower(FrontRight);
-                motorLeftFront.setPower(FrontLeft);
-                motorLeftBack.setPower(BackLeft);
-                motorRightBack.setPower(BackRight);
-                telemetry.update();
-            }
+            telemetry.addData("Lift position", motorLift.getCurrentPosition());
+            telemetry.addData("Heading", gyro.getHeading());
+            telemetry.update();
+            float gamepad1LeftY = -gamepad1.left_stick_y;
+            float gamepad1LeftX = gamepad1.left_stick_x;
+            float gamepad1RightX = -gamepad1.left_trigger + gamepad1.right_trigger;
+            //Formulas for holonomic power
+            float FrontLeft = -gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
+            float FrontRight = gamepad1LeftY - gamepad1LeftX - gamepad1RightX;
+            float BackRight = gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
+            float BackLeft = -gamepad1LeftY + gamepad1LeftX - gamepad1RightX;
+            //Make sure each is in the proper range and if not, make it
+            FrontRight = Range.clip(FrontRight, -1, 1);
+            FrontLeft = Range.clip(FrontLeft, -1, 1);
+            BackLeft = Range.clip(BackLeft, -1, 1);
+            BackRight = Range.clip(BackRight, -1, 1);
+            //Set the power to each motor
+            motorRightFront.setPower(FrontRight);
+            motorLeftFront.setPower(FrontLeft);
+            motorLeftBack.setPower(BackLeft);
+            motorRightBack.setPower(BackRight);
+            telemetry.update();
         }
+    }
+
+    public void setLiftPosition(int i) {
+        // 0 = bottom, -4300 = top
+        motorLift.setTargetPosition(i);
+        motorLift.setPower(0.5);
     }
 
 }
