@@ -109,14 +109,15 @@ public class REDFINAL extends LinearOpMode {
         forward(-2450);
         turn(-2800);
         power = 0.2;
+        arm(1600);
         left(-1000);
         power = 0.4;
         left(1300);
         turn(1420);
         if (vuMark == RelicRecoveryVuMark.RIGHT) {
-            left(-400);
+            left(-450);
         } else if (vuMark == RelicRecoveryVuMark.LEFT) {
-            left(400);
+            left(450);
         }
         left.setPosition(0.5);
         right.setPosition(0.5);

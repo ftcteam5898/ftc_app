@@ -86,8 +86,6 @@ public class MainTeleOp2P extends LinearOpMode {
 
         jewel.setPosition(0);
 
-        setLiftPosition(1000);
-
         Timer time = new Timer();
 
         left.setPosition(0.5);
