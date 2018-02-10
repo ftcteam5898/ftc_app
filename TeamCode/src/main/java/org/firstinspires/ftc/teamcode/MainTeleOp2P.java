@@ -28,7 +28,7 @@ import java.util.TimerTask;
  * be easily adapted.
  */
 
-@TeleOp(name="MainTeleOp", group="TeleOp")
+@TeleOp(name="MainTeleOp2P", group="TeleOp")
 public class MainTeleOp2P extends LinearOpMode {
 
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront, motorLift;
@@ -37,10 +37,12 @@ public class MainTeleOp2P extends LinearOpMode {
     private ModernRoboticsI2cGyro gyro = null;
     private boolean backwards = false;
     private boolean halfSpeed = false;
+    private long loopCountHalf = 0;
+    private long loopCountBackwards = 0;
 
     private class Move extends TimerTask {
-        MainTeleOp MTO = null;
-        public Move(MainTeleOp mto) {
+        MainTeleOp2P MTO = null;
+        public Move(MainTeleOp2P mto) {
             MTO = mto;
         }
         public void run() {
@@ -135,7 +137,7 @@ public class MainTeleOp2P extends LinearOpMode {
                 jewel.setPosition(0);
             }
             if (gamepad2.right_bumper) {
-                motorLift.setTargetPosition(motorLift.getCurrentPosition()+10);
+                motorLift.setTargetPosition(motorLift.getCurrentPosition()+50);
                 motorLift.setPower(0.5);
             }
             if (gamepad2.dpad_up) {
@@ -144,21 +146,16 @@ public class MainTeleOp2P extends LinearOpMode {
                 setLiftPosition(0);
             }
             if (gamepad2.y) {
-                if (!backwards) {
-                    backwards = true;
-                } else {
-                    backwards = false;
+                if (loopCountBackwards > 50) {
+                    loopCountBackwards = 0;
+                    backwards = !backwards;
                 }
             }
             if (gamepad2.x) {
-                if (!halfSpeed) {
-                    halfSpeed = true;
-                } else {
-                    halfSpeed = false;
+                if (loopCountHalf > 50) {
+                    loopCountHalf = 0;
+                    halfSpeed = !halfSpeed;
                 }
-            }
-            if (gamepad2.b) {
-                turn(-2800);
             }
             if (gamepad2.a) {
                 motorLift.setPower(0);
@@ -204,31 +201,10 @@ public class MainTeleOp2P extends LinearOpMode {
                 motorLeftBack.setPower(-BackLeft/2);
                 motorRightBack.setPower(-BackRight/2);
             }
+            loopCountHalf++;
+            loopCountBackwards++;
             telemetry.update();
         }
-    }
-    public void turn(int i) {
-        motorLeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorRightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        motorLeftBack.setTargetPosition(motorLeftBack.getCurrentPosition() + i);
-        motorLeftFront.setTargetPosition(motorLeftFront.getCurrentPosition() + i);
-        motorRightBack.setTargetPosition(motorRightBack.getCurrentPosition() + i);
-        motorRightFront.setTargetPosition(motorRightFront.getCurrentPosition() + i);
-        motorLeftBack.setPower(0.3);
-        motorLeftFront.setPower(0.3);
-        motorRightBack.setPower(0.3);
-        motorRightFront.setPower(0.3);
-        motorLeftBack.setPower(0);
-        motorLeftFront.setPower(0);
-        motorRightBack.setPower(0);
-        motorRightFront.setPower(0);
-        motorLeftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorLeftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorRightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorRightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void setLiftPosition(int i) {
