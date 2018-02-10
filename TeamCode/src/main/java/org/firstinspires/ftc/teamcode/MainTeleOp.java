@@ -34,7 +34,6 @@ public class MainTeleOp extends LinearOpMode {
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront, motorLift;
     private Servo left, right, left1, right1, jewel;
     private boolean manual = false;
-    private ModernRoboticsI2cGyro gyro = null;
 
     private class Move extends TimerTask {
         MainTeleOp MTO = null;
@@ -50,7 +49,6 @@ public class MainTeleOp extends LinearOpMode {
     public void runOpMode() {
 
         jewel = hardwareMap.get(Servo.class, "jewels");
-        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
         motorRightBack = hardwareMap.get(DcMotor.class, "mrb");
         motorRightBack.setDirection(DcMotor.Direction.FORWARD);
         motorLeftFront = hardwareMap.get(DcMotor.class, "mlf");
@@ -71,14 +69,6 @@ public class MainTeleOp extends LinearOpMode {
 
         //Wait for the play button to be hit
         waitForStart();
-
-        gyro.calibrate();
-
-        // make sure the gyro is calibrated before continuing
-        while (!isStopRequested() && gyro.isCalibrating())  {
-            sleep(50);
-            idle();
-        }
 
         jewel.setPosition(0);
 
@@ -131,7 +121,6 @@ public class MainTeleOp extends LinearOpMode {
 
             }
             telemetry.addData("Lift position", motorLift.getCurrentPosition());
-            telemetry.addData("Heading", gyro.getHeading());
             telemetry.update();
             float gamepad1LeftY = -gamepad1.left_stick_y;
             float gamepad1LeftX = gamepad1.left_stick_x;

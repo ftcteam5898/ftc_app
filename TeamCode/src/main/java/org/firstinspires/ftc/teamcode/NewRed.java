@@ -17,14 +17,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by William.Beard on 1/30/2018.
  */
 
-@Autonomous(name="Red Final", group="Autonomous")
-public class REDFINAL extends LinearOpMode {
+@Autonomous(name="NewRed", group="Autonomous")
+public class NewRed extends LinearOpMode {
 
     private Servo jewel;
     private Servo left, right, left1, right1;
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront;
     private DcMotor motorLift;
-    private double power = 0.6;
     private ColorSensor cs;
     private VuforiaLocalizer vuforia;
 
@@ -67,64 +66,80 @@ public class REDFINAL extends LinearOpMode {
         waitForStart();
         relicTrackables.activate();
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.UNKNOWN;
-        while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
+        int max = 0;
+        /*while (vuMark == RelicRecoveryVuMark.UNKNOWN) {
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        }
+            max++;
+        }*/
         telemetry.addData("Vuforia", vuMark.toString());
         telemetry.update();
         left.setPosition(0.5);
         right.setPosition(0.5);
         left1.setPosition(0.5);
         right1.setPosition(0.5);
+        if (!opModeIsActive()) {return;}
         arm(800);
+        if (!opModeIsActive()) {return;}
         for (double d = 0.2; d <= 1; d += 0.01) {
-            jewel.setPosition(d);
+            jewel.setPosition(d); // Lower Jewel Arm
+            if (!sleep(25)) return;
         }
+        if (!opModeIsActive()) {return;}
         left.setPosition(1);
         right.setPosition(0);
         left1.setPosition(1);
         right1.setPosition(0);
+        if (!opModeIsActive()) {return;}
         sleep(1000);
-        arm(-1800);
+        if (!opModeIsActive()) {return;}
+        arm(-1600);
+        if (!opModeIsActive()) {return;}
         int i = color();
-        int times = 0;
-        while (i == 0 && times < 5) {
-            turn(20);
-            times++;
-            i = color();
-        }
-        turn(-10*times);
+        if (!opModeIsActive()) {return;}
         if (i >= 1) {
             turn(-150);
+            if (!opModeIsActive()) {return;}
             jewel.setPosition(0);
+            if (!opModeIsActive()) {return;}
             turn(150);
+            if (!opModeIsActive()) {return;}
         } else if (i <= -1) {
             turn(150);
+            if (!opModeIsActive()) {return;}
             jewel.setPosition(0);
+            if (!opModeIsActive()) {return;}
             turn(-150);
+            if (!opModeIsActive()) {return;}
         } else {
             jewel.setPosition(0);
+            if (!opModeIsActive()) {return;}
             sleep(500);
+            if (!opModeIsActive()) {return;}
         }
-        forward(-2450);
-        turn(-2800);
-        power = 0.2;
-        left(-1000);
-        power = 0.4;
-        left(1300);
-        turn(1420);
         if (vuMark == RelicRecoveryVuMark.RIGHT) {
-            left(-400);
-        } else if (vuMark == RelicRecoveryVuMark.LEFT) {
-            left(400);
+            forward(-2100);
+            if (!opModeIsActive()) {return;}
+        } else if (vuMark == RelicRecoveryVuMark.CENTER) {
+            forward(-2600);
+            if (!opModeIsActive()) {return;}
+        } else {
+            forward(-3100);
+            if (!opModeIsActive()) {return;}
         }
-        left.setPosition(0.5);
-        right.setPosition(0.5);
-        left1.setPosition(0.5);
-        right1.setPosition(0.5);
-        sleep(500);
-        forward(1100);
-
+        turn(-1460);
+        if (!opModeIsActive()) {return;}
+        left.setPosition(0);
+        right.setPosition(1);
+        left1.setPosition(0);
+        right1.setPosition(1);
+        if (!opModeIsActive()) {return;}
+        for (int a = 900; a <= 1100; a += 100) {
+            forward(a);
+            forward(-a);
+        }
+        if (!opModeIsActive()) {return;}
+        forward(400);
+        if (!opModeIsActive()) {return;}
 
     }
 
@@ -146,35 +161,10 @@ public class REDFINAL extends LinearOpMode {
         motorLeftFront.setTargetPosition(motorLeftFront.getCurrentPosition() + i);
         motorRightBack.setTargetPosition(motorRightBack.getCurrentPosition() - i);
         motorRightFront.setTargetPosition(motorRightFront.getCurrentPosition() - i);
-        motorLeftBack.setPower(power);
-        motorLeftFront.setPower(power);
-        motorRightBack.setPower(power);
-        motorRightFront.setPower(power);
-        while (opModeIsActive() && motorLeftFront.isBusy() && motorRightFront.isBusy() && motorRightBack.isBusy() && motorLeftBack.isBusy()) {}
-        motorLeftBack.setPower(0);
-        motorLeftFront.setPower(0);
-        motorRightBack.setPower(0);
-        motorRightFront.setPower(0);
-        motorLeftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorLeftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorRightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorRightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    public void left(int i) {
-        i = -i;
-        motorLeftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorRightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorLeftBack.setTargetPosition(motorLeftBack.getCurrentPosition() - i);
-        motorLeftFront.setTargetPosition(motorLeftFront.getCurrentPosition() + i);
-        motorRightBack.setTargetPosition(motorRightBack.getCurrentPosition() - i);
-        motorRightFront.setTargetPosition(motorRightFront.getCurrentPosition() + i);
-        motorLeftBack.setPower(power);
-        motorLeftFront.setPower(power);
-        motorRightBack.setPower(power);
-        motorRightFront.setPower(power);
+        motorLeftBack.setPower(0.7);
+        motorLeftFront.setPower(0.7);
+        motorRightBack.setPower(0.7);
+        motorRightFront.setPower(0.7);
         while (opModeIsActive() && motorLeftFront.isBusy() && motorRightFront.isBusy() && motorRightBack.isBusy() && motorLeftBack.isBusy()) {}
         motorLeftBack.setPower(0);
         motorLeftFront.setPower(0);
@@ -191,14 +181,15 @@ public class REDFINAL extends LinearOpMode {
         motorLeftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorRightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorRightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         motorLeftBack.setTargetPosition(motorLeftBack.getCurrentPosition() + i);
         motorLeftFront.setTargetPosition(motorLeftFront.getCurrentPosition() + i);
         motorRightBack.setTargetPosition(motorRightBack.getCurrentPosition() + i);
         motorRightFront.setTargetPosition(motorRightFront.getCurrentPosition() + i);
-        motorLeftBack.setPower(power);
-        motorLeftFront.setPower(power);
-        motorRightBack.setPower(power);
-        motorRightFront.setPower(power);
+        motorLeftBack.setPower(0.3);
+        motorLeftFront.setPower(0.3);
+        motorRightBack.setPower(0.3);
+        motorRightFront.setPower(0.3);
         while (opModeIsActive() && motorLeftFront.isBusy() && motorRightFront.isBusy() && motorRightBack.isBusy() && motorLeftBack.isBusy()) {}
         motorLeftBack.setPower(0);
         motorLeftFront.setPower(0);
