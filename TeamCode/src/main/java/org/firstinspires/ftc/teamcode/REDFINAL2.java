@@ -104,14 +104,12 @@ public class REDFINAL2 extends LinearOpMode {
             jewel.setPosition(0);
             sleep(500);
         }
-        turn(1420);
-        forward(200);
         power = 0.2;
         arm(1600);
-        left(-1000);
         power = 0.4;
-        left(1300);
-        turn(1420);
+        forward(-1000);
+        turn(-2820);
+        left(800);
         if (vuMark == RelicRecoveryVuMark.RIGHT) {
             left(-450);
         } else if (vuMark == RelicRecoveryVuMark.LEFT) {
