@@ -12,14 +12,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
 /**
- * Created by Alice.Gao on 2/11/2018.
+ * Created by Nicholas.Mazzaferro on 2/14/2018.
  */
 
-@Autonomous(name="BLUELANE", group="Autonomous")
-public class BLUELANE extends LinearOpMode {
-
+@Autonomous(name="Blue Corner", group="Autonomous")
+public class BLUECORNER extends LinearOpMode {
     private Servo jewel;
     private Servo left, right;
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront;
@@ -100,22 +98,20 @@ public class BLUELANE extends LinearOpMode {
             jewel.setPosition(0);
             sleep(500);
         }
-        forward(2700);
-        turn(-2800);
-        power = 0.2;
-        arm(1600);
-        left(-1000);
-        power = 0.4;
-        left(1300);
-        turn(1420);
+        forward(1750);
+        left(-650);
         if (vuMark == RelicRecoveryVuMark.RIGHT) {
             left(-450);
         } else if (vuMark == RelicRecoveryVuMark.LEFT) {
             left(450);
         }
+        power = 0.2;
+        arm(1600);
+        power = 0.4;
         left.setPosition(0.5);
+        right.setPosition(0.5);
         sleep(500);
-        forward(1100);
+        forward(650);
         forward(-250);
     }
 
@@ -217,5 +213,4 @@ public class BLUELANE extends LinearOpMode {
         }
         return rminusbsum;
     }
-
 }

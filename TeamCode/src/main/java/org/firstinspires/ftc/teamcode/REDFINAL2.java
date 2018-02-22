@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 @Autonomous(name="Red Final 2", group="Autonomous")
 public class REDFINAL2 extends LinearOpMode {
     private Servo jewel;
-    private Servo left, right, left1, right1;
+    private Servo left, right;
     private DcMotor motorLeftBack, motorRightBack, motorRightFront, motorLeftFront;
     private DcMotor motorLift;
     private double power = 0.6;
@@ -60,8 +60,6 @@ public class REDFINAL2 extends LinearOpMode {
         motorLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         left = hardwareMap.get(Servo.class, "lefts");
         right = hardwareMap.get(Servo.class, "rights");
-        left1 = hardwareMap.get(Servo.class, "lefts1");
-        right1 = hardwareMap.get(Servo.class, "rights1");
         waitForStart();
         relicTrackables.activate();
         RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.UNKNOWN;
@@ -72,16 +70,12 @@ public class REDFINAL2 extends LinearOpMode {
         telemetry.update();
         left.setPosition(0.5);
         right.setPosition(0.5);
-        left1.setPosition(0.5);
-        right1.setPosition(0.5);
         arm(800);
         for (double d = 0.2; d <= 1; d += 0.01) {
             jewel.setPosition(d);
         }
         left.setPosition(1);
         right.setPosition(0);
-        left1.setPosition(1);
-        right1.setPosition(0);
         sleep(1000);
         arm(-1800);
         int i = color();
@@ -104,25 +98,22 @@ public class REDFINAL2 extends LinearOpMode {
             jewel.setPosition(0);
             sleep(500);
         }
-        power = 0.2;
-        arm(1600);
-        power = 0.4;
-        forward(-1000);
+        forward(-1750);
         turn(-2820);
-        left(800);
+        left(650);
         if (vuMark == RelicRecoveryVuMark.RIGHT) {
             left(-450);
         } else if (vuMark == RelicRecoveryVuMark.LEFT) {
             left(450);
         }
+        power = 0.2;
+        arm(1600);
+        power = 0.4;
         left.setPosition(0.5);
         right.setPosition(0.5);
-        left1.setPosition(0.5);
-        right1.setPosition(0.5);
         sleep(500);
-        forward(1100);
-
-
+        forward(650);
+        forward(-250);
     }
 
     public void arm(int i) {
